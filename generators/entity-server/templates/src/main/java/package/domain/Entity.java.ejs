@@ -83,6 +83,8 @@ Object.keys(uniqueEnums).forEach(function(element) { _%>
 
 import <%=packageName%>.domain.enumeration.<%= element %>;
 <%_ }); _%>
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 <%_ if (databaseType === 'couchbase') { _%>
 import static <%=packageName%>.config.Constants.ID_DELIMITER;
@@ -225,7 +227,8 @@ public class <%= entityClass %> implements Serializable {
     <%_ }
         if (relationshipType === 'one-to-many') {
     _%>
-    @OneToMany(mappedBy = "<%= otherEntityRelationshipName %>")
+    @JsonManagedReference
+    @OneToMany(mappedBy = "<%= otherEntityRelationshipName %>", cascade = {CascadeType.ALL}, orphanRemoval = true)
     <%_ if (enableHibernateCache) {
             if (cacheProvider === 'infinispan') { _%>
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -236,6 +239,7 @@ public class <%= entityClass %> implements Serializable {
     private Set<<%= otherEntityNameCapitalized %>> <%= relationshipFieldNamePlural %> = new HashSet<>();
 
     <%_ } else if (relationshipType === 'many-to-one') { _%>
+    @JsonBackReference
     @ManyToOne<% if (relationshipRequired) { %>(optional = false)<% } %>
         <%_ if (relationshipValidate) { _%>
     <%- include relationship_validators -%>
