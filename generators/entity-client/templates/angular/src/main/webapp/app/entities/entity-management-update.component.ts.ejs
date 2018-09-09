@@ -110,10 +110,14 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
         this.isSaving = false;
         this.activatedRoute.data.subscribe(({<%= entityInstance %>}) => {
             this.<%= entityInstance %> = <%= entityInstance %>;
+            this.onDataCallback ();
         });
         <%_ for (idx in queries) { _%>
         <%- queries[idx] %>
         <%_ } _%>
+    }
+
+    onDataCallback() {
     }
 
     <%_ if (fieldsContainBlob) { _%>
