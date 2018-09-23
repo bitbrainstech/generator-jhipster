@@ -117,8 +117,7 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
         <%_ } _%>
     }
 
-    onDataCallback() {
-    }
+    onDataCallback() {}
 
     <%_ if (fieldsContainBlob) { _%>
     byteSize(field) {
@@ -167,17 +166,16 @@ export class <%= entityAngularName %>UpdateComponent implements OnInit {
             this.onSaveSuccess(), (res: HttpErrorResponse) => this.onSaveError());
     }
 
-    private onSaveSuccess() {
+    onSaveSuccess() {
         this.isSaving = false;
-        this.previousState();
     }
 
-    private onSaveError() {
+    onSaveError() {
         this.isSaving = false;
     }
     <%_ if (queries && queries.length > 0) { _%>
 
-    private onError(errorMessage: string) {
+    onError(errorMessage: string) {
         this.jhiAlertService.error(errorMessage, null, null);
     }
     <%_ } _%>
