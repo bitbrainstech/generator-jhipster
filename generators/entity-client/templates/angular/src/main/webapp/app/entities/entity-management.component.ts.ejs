@@ -54,6 +54,8 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy {
         this.registerChangeIn<%= entityClassPlural %>();
     }
 
+    onDataCallback() {}
+
     ngOnDestroy() {
         this.eventManager.destroy(this.eventSubscriber);
     }

@@ -56,6 +56,7 @@
         this.<%= entityInstance %>Service.query().subscribe(
             (res: HttpResponse<I<%= entityAngularName %>[]>) => {
                 this.<%= entityInstancePlural %> = res.body;
+                this.onDataCallback();
                 <%_ if (searchEngine === 'elasticsearch') { _%>
                 this.currentSearch = '';
                 <%_ } _%>
