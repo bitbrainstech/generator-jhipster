@@ -17,10 +17,10 @@
  * limitations under the License.
  */
 
-const crypto = require('crypto');
 const chalk = require('chalk');
 
 const constants = require('../generator-constants');
+const { getBase64Secret, getRandomHex } = require('../utils');
 
 module.exports = {
     askForModuleName,
@@ -46,18 +46,21 @@ function askForServerSideOpts(meta) {
     }
     const prompts = [
         {
-            when: response => (applicationType === 'gateway' || applicationType === 'microservice' || applicationType === 'uaa'),
+            when: response => applicationType === 'gateway' || applicationType === 'microservice' || applicationType === 'uaa',
             type: 'input',
             name: 'serverPort',
             validate: input => (/^([0-9]*)$/.test(input) ? true : 'This is not a valid port number.'),
-            message: 'As you are running in a microservice architecture, on which port would like your server to run? It should be unique to avoid port conflicts.',
+            message:
+                'As you are running in a microservice architecture, on which port would like your server to run? It should be unique to avoid port conflicts.',
             default: defaultPort
         },
         {
             type: 'input',
             name: 'packageName',
-            validate: input => (/^([a-z_]{1}[a-z0-9_]*(\.[a-z_]{1}[a-z0-9_]*)*)$/.test(input)
-                ? true : 'The package name you have provided is not a valid Java package name.'),
+            validate: input =>
+                /^([a-z_]{1}[a-z0-9_]*(\.[a-z_]{1}[a-z0-9_]*)*)$/.test(input)
+                    ? true
+                    : 'The package name you have provided is not a valid Java package name.',
             message: 'What is your default Java package name?',
             default: 'com.mycompany.myapp',
             store: true
@@ -101,14 +104,13 @@ function askForServerSideOpts(meta) {
             default: false
         },
         {
-            when: response => (
-                (applicationType === 'monolith' && response.serviceDiscoveryType !== 'eureka')
-                || ['gateway', 'microservice'].includes(applicationType)
-            ),
+            when: response =>
+                (applicationType === 'monolith' && response.serviceDiscoveryType !== 'eureka') ||
+                ['gateway', 'microservice'].includes(applicationType),
             type: 'list',
             name: 'authenticationType',
             message: `Which ${chalk.yellow('*type*')} of authentication would you like to use?`,
-            choices: (response) => {
+            choices: response => {
                 const opts = [
                     {
                         value: 'jwt',
@@ -138,12 +140,13 @@ function askForServerSideOpts(meta) {
             default: 0
         },
         {
-            when: response => ((applicationType === 'gateway' || applicationType === 'microservice') && response.authenticationType === 'uaa'),
+            when: response =>
+                (applicationType === 'gateway' || applicationType === 'microservice') && response.authenticationType === 'uaa',
             type: 'input',
             name: 'uaaBaseName',
             message: 'What is the folder path of your UAA application?',
             default: '../uaa',
-            validate: (input) => {
+            validate: input => {
                 const uaaAppData = this.getUaaAppName(input);
 
                 if (uaaAppData && uaaAppData.baseName && uaaAppData.applicationType === 'uaa') {
@@ -156,7 +159,7 @@ function askForServerSideOpts(meta) {
             type: 'list',
             name: 'databaseType',
             message: `Which ${chalk.yellow('*type*')} of database would you like to use?`,
-            choices: (response) => {
+            choices: response => {
                 const opts = [];
                 if (!reactive) {
                     opts.push({
@@ -174,8 +177,8 @@ function askForServerSideOpts(meta) {
                         name: 'Couchbase'
                     });
                     if (
-                        (response.authenticationType !== 'oauth2' && applicationType === 'microservice')
-                        || (response.authenticationType === 'uaa' && applicationType === 'gateway')
+                        (response.authenticationType !== 'oauth2' && applicationType === 'microservice') ||
+                        (response.authenticationType === 'uaa' && applicationType === 'gateway')
                     ) {
                         opts.push({
                             value: 'no',
@@ -206,16 +209,17 @@ function askForServerSideOpts(meta) {
             type: 'list',
             name: 'devDatabaseType',
             message: `Which ${chalk.yellow('*development*')} database would you like to use?`,
-            choices: response => [
-                {
-                    value: 'h2Disk',
-                    name: 'H2 with disk-based persistence'
-                },
-                {
-                    value: 'h2Memory',
-                    name: 'H2 with in-memory persistence'
-                }
-            ].concat(constants.SQL_DB_OPTIONS.find(it => it.value === response.prodDatabaseType)),
+            choices: response =>
+                [
+                    {
+                        value: 'h2Disk',
+                        name: 'H2 with disk-based persistence'
+                    },
+                    {
+                        value: 'h2Memory',
+                        name: 'H2 with in-memory persistence'
+                    }
+                ].concat(constants.SQL_DB_OPTIONS.find(it => it.value === response.prodDatabaseType)),
             default: 0
         },
         {
@@ -239,17 +243,20 @@ function askForServerSideOpts(meta) {
                 },
                 {
                     value: 'memcached',
-                    name: 'Yes, with Memcached (distributed cache) - Warning, when using an SQL database, this will disable the Hibernate 2nd level cache!'
+                    name:
+                        'Yes, with Memcached (distributed cache) - Warning, when using an SQL database, this will disable the Hibernate 2nd level cache!'
                 },
                 {
                     value: 'no',
                     name: 'No - Warning, when using an SQL database, this will disable the Hibernate 2nd level cache!'
                 }
             ],
-            default: (applicationType === 'microservice' || applicationType === 'uaa') ? 1 : 0
+            default: applicationType === 'microservice' || applicationType === 'uaa' ? 1 : 0
         },
         {
-            when: response => (((response.cacheProvider !== 'no' && response.cacheProvider !== 'memcached') || applicationType === 'gateway') && response.databaseType === 'sql'),
+            when: response =>
+                ((response.cacheProvider !== 'no' && response.cacheProvider !== 'memcached') || applicationType === 'gateway') &&
+                response.databaseType === 'sql',
             type: 'confirm',
             name: 'enableHibernateCache',
             message: 'Do you want to use Hibernate 2nd level cache?',
@@ -277,7 +284,7 @@ function askForServerSideOpts(meta) {
 
     const done = this.async();
 
-    this.prompt(prompts).then((props) => {
+    this.prompt(prompts).then(props => {
         this.serviceDiscoveryType = props.serviceDiscoveryType;
         this.authenticationType = props.authenticationType;
 
@@ -288,11 +295,11 @@ function askForServerSideOpts(meta) {
         }
 
         if (this.authenticationType === 'session') {
-            this.rememberMeKey = crypto.randomBytes(50).toString('hex');
+            this.rememberMeKey = getRandomHex();
         }
 
         if (this.authenticationType === 'jwt' || this.applicationType === 'microservice') {
-            this.jwtSecretKey = Buffer.from(crypto.randomBytes(64).toString('hex')).toString('base64');
+            this.jwtSecretKey = getBase64Secret(null, 64);
         }
 
         // user-management will be handled by UAA app, oauth expects users to be managed in IpP
@@ -345,30 +352,31 @@ function askForServerSideOpts(meta) {
 
 function askForOptionalItems(meta) {
     if (!meta && this.existingProject) return;
-    if (this.reactive) return;
 
     const applicationType = this.applicationType;
     const choices = [];
     const defaultChoice = [];
-    if (this.databaseType === 'sql' || this.databaseType === 'mongodb') {
+    if (!this.reactive) {
+        if (this.databaseType === 'sql' || this.databaseType === 'mongodb') {
+            choices.push({
+                name: 'Search engine using Elasticsearch',
+                value: 'searchEngine:elasticsearch'
+            });
+        }
+        if (applicationType === 'monolith' || applicationType === 'gateway') {
+            choices.push({
+                name: 'WebSockets using Spring Websocket',
+                value: 'websocket:spring-websocket'
+            });
+        }
         choices.push({
-            name: 'Search engine using Elasticsearch',
-            value: 'searchEngine:elasticsearch'
-        });
-    }
-    if (applicationType === 'monolith' || applicationType === 'gateway') {
-        choices.push({
-            name: 'WebSockets using Spring Websocket',
-            value: 'websocket:spring-websocket'
+            name: 'Asynchronous messages using Apache Kafka',
+            value: 'messageBroker:kafka'
         });
     }
     choices.push({
         name: 'API first development using OpenAPI-generator',
         value: 'enableSwaggerCodegen:true'
-    });
-    choices.push({
-        name: 'Asynchronous messages using Apache Kafka',
-        value: 'messageBroker:kafka'
     });
 
     const PROMPTS = {
@@ -383,7 +391,7 @@ function askForOptionalItems(meta) {
 
     const done = this.async();
     if (choices.length > 0) {
-        this.prompt(PROMPTS).then((prompt) => {
+        this.prompt(PROMPTS).then(prompt => {
             this.serverSideOptions = prompt.serverSideOptions;
             this.websocket = this.getOptionFromArray(this.serverSideOptions, 'websocket');
             this.searchEngine = this.getOptionFromArray(this.serverSideOptions, 'searchEngine');
