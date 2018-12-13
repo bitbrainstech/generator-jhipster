@@ -156,6 +156,9 @@ public class <%= entityClass %> implements Serializable {
     const fieldName = fields[idx].fieldName;
     const fieldNameUnderscored = fields[idx].fieldNameUnderscored;
     const fieldNameAsDatabaseColumn = fields[idx].fieldNameAsDatabaseColumn;
+    if (fieldName === 'createdBy' || fieldName === 'createdDate' || fieldName === 'lastModifiedBy' || fieldName === 'lastModifiedDate') {
+        continue;
+    }
     if (fieldValidate === true) {
         if (fieldValidate === true && fieldValidateRules.includes('required')) {
             required = true;
