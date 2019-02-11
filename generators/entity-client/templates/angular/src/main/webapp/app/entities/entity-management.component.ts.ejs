@@ -111,6 +111,8 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy {
         for (let i = 0; i < data.length; i++) {
             this.<%= entityInstancePlural %>.push(data[i]);
         }
+        this.onDataCallback();
+        this.loading = false;
     }
     <%_ }} _%>
 

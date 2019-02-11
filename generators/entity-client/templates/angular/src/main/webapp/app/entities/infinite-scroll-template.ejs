@@ -26,6 +26,7 @@
     queryCount: any;
     reverse: any;
     totalItems: number;
+    loading: boolean;
     <%_ if (searchEngine === 'elasticsearch') { _%>
     currentSearch: string;
     <%_ } _%>
@@ -58,6 +59,7 @@
     }
 
     loadAll() {
+        this.loading = true;
     <%_ if (searchEngine === 'elasticsearch') { _%>
         if (this.currentSearch) {
             this.<%= entityInstance %>Service.search({

@@ -73,6 +73,11 @@ export class <%= entityAngularName %>Service {
             <% if (fieldsContainDate) { %>.pipe(map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)))<% } %>;
     }
 
+    count(req?: any): Observable<HttpResponse<number>> {
+        const options = createRequestOption(req);
+        return this.http.get<number>(this.resourceUrl + '/count', { params: options, observe: 'response' });
+    }
+
     delete(id: <% if (pkType === 'String') { %>string<% } else { %>number<% } %>): Observable<HttpResponse<any>> {
         return this.http.delete<any>(`${this.resourceUrl}/${id}`, { observe: 'response'});
     }
