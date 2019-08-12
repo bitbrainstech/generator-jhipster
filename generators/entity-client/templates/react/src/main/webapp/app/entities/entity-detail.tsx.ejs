@@ -37,7 +37,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { IRootState } from 'app/shared/reducers';
-import { getEntity } from './<%= entityFileName %>.reducer';
+import { getEntity, updateEntity } from './<%= entityFileName %>.reducer';
 import { I<%= entityReactName %> } from 'app/shared/model/<%= entityModelFileName %>.model';
 // tslint:disable-next-line:no-unused-variable
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
@@ -181,11 +181,11 @@ export class <%= entityReactName %>Detail extends React.Component<I<%= entityRea
   }
 }
 
-const mapStateToProps = ({ <%= entityInstance %> }: IRootState) => ({
+export const mapStateToProps = ({ <%= entityInstance %> }: IRootState) => ({
     <%= entityInstance %>Entity: <%= entityInstance %>.entity
 });
 
-const mapDispatchToProps = { getEntity };
+export const mapDispatchToProps = { getEntity, updateEntity };
 
 type StateProps = ReturnType<typeof mapStateToProps>;
 type DispatchProps = typeof mapDispatchToProps;
